@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Citrix.MachineCreationAPI;
 using DD.CBU.Compute.Api.Contracts.Network20;
 
 namespace DimensionDataProvisioningPlugin
 {
+    /// <summary>
+    /// Implementation Summary
+    ///  * todo - find the provisioned server ID so it can be sent to the inventory
+    /// </summary>
     public partial class DimensionDataService : ISynchronousProvisioning
     {
         public bool SupportsBatchedCreationRequests
@@ -35,15 +40,41 @@ namespace DimensionDataProvisioningPlugin
                 /// Something kinda like this...
                 DeployServerType details = new DeployServerType
                 {
+                    // Provision the VM into the default network domain and VLAN
+                    networkInfo = new DeployServerTypeNetworkInfo
+                    {
+                        networkDomainId = GetNetworkDomainId(connectionSettings).ToString(),
+                        primaryNic = new VlanIdOrPrivateIpType
+                        {
+                            vlanId  = GetVlanId(connectionSettings).ToString()
+                        }
+                    },
                     administratorPassword = "thepassword",
-                    imageId = "the image id",
-                    cpu = new DeployServerTypeCpu() { coresPerSocket = 1, coresPerSocketSpecified = true, count = 2, countSpecified = true, speed = "STANDARD" }
+                    imageId = GetDefaultImageId(connectionSettings),
+                    cpu = new DeployServerTypeCpu {
+                        coresPerSocket = _defaultCoresPerSocket,
+                        coresPerSocketSpecified = true,
+                        count = _defaultCpuCount,
+                        countSpecified = true,
+                        speed = "STANDARD" // TODO : Make this configurable
+                    },
+                    description = "Provisioned by Citrix",
+                    name = request.MachineName
                 };
                 var response = client.ServerManagement.Server.DeployServer(details).Result;
                 // This isn't correct. but an indication of how it's done.
                 results.Add(new MachineCreationResult(response.info[0].value, response.info[0].value, null));
             }
-            
+            return results;
+        }
+
+        private string GetDefaultImageId(ConnectionSettings connectionSettings)
+        {
+            var client = connectionSettings.GetComputeClient();
+            var images = client.ServerManagementLegacy.ServerImage.GetImages(null, _defaultImageName, null, null, null).Result;
+            if (images == null || !images.Any())
+                throw new Exception("Cannot find default image");
+            return images.First().id;
         }
 
         public void DeleteMachines(ConnectionSettings connectionSettings, IList<string> machineIds)

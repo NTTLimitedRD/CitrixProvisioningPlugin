@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.AddIn;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.AddIn;
 using Citrix.MachineCreationAPI;
 using Citrix.ManagedMachineAPI;
 
 namespace DimensionDataProvisioningPlugin
 {
+    /// <summary>
+    /// Implementation Summary:
+    ///  * Complete
+    /// </summary>
     [AddIn("DimensionDataProvisioningFactory", Publisher = "Dimension Data, Ltd.", Version = "1.0.0.0")]
     public class DimensionDataProvisioningFactory : IMachineCreationFactory
     {

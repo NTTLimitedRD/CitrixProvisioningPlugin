@@ -1,4 +1,6 @@
-﻿using Citrix.MachineCreationAPI;
+﻿using System;
+using System.Configuration;
+using Citrix.MachineCreationAPI;
 using Citrix.ManagedMachineAPI;
 using System.Net;
 
@@ -15,10 +17,25 @@ namespace DimensionDataProvisioningPlugin
         /// </summary>
         private readonly ILogProvider logger;
 
+        private string _defaultImageName;
+        private int _defaultServerMemorySizeGb;
+        private int _defaultCpuCount;
+        private int _defaultCoresPerSocket;
+        private string _defaultNetworkDomain;
+        private string _defaultVlan;
+
         public DimensionDataService(ILogProvider logger)
         {
             this.logger = logger;
             GatherInventory();
+
+            // Load defaults
+            _defaultImageName = ConfigurationManager.AppSettings["defaultImageName"];
+            _defaultServerMemorySizeGb = Convert.ToInt32(ConfigurationManager.AppSettings["defaultServerMemoryGb"]);
+            _defaultCoresPerSocket = Convert.ToInt32(ConfigurationManager.AppSettings["defaultServerCoresPerSocket"]);
+            _defaultCpuCount = Convert.ToInt32(ConfigurationManager.AppSettings["defaultServerCpuCount"]);
+            _defaultNetworkDomain = ConfigurationManager.AppSettings["defaultNetworkDomainName"];
+            _defaultVlan = ConfigurationManager.AppSettings["defaultVlanName"];
         }
 
         public void ValidateConnectionSettings(ConnectionSettings connectionSettings)
@@ -35,7 +52,7 @@ namespace DimensionDataProvisioningPlugin
             // Currently just issue a trace log (avoiding the password), but this is where you would
             // add code to verify the correct address and credentials.
             logger.TraceMsg(
-                "Connecting to Example API endpoint {0} as user {1}",
+                "Connecting to Dimension Data API endpoint {0} as user {1}",
                 endpoint,
                 defaultCredential.UserName);
 

@@ -1,18 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Citrix.MachineCreationAPI;
 using Citrix.ManagedMachineAPI;
+using DD.CBU.Compute.Api.Client;
+using DD.CBU.Compute.Api.Contracts.Network20;
 
 namespace DimensionDataProvisioningPlugin
 {
+    /// <summary>
+    /// Implementation summary:
+    ///  * Complete
+    /// </summary>
     public partial class DimensionDataService : ISynchronousManagement
     {
+        /// <summary>
+        /// Get the Citrix machine model for the given server ID
+        /// </summary>
+        /// <param name="connectionSettings"></param>
+        /// <param name="machineId"></param>
+        /// <returns></returns>
         public IManagedMachine GetMachineDetails(ConnectionSettings connectionSettings, string machineId)
         {
-            throw new NotImplementedException();
+            ComputeApiClient client = connectionSettings.GetComputeClient();
+            ServerType server = client.ServerManagement.Server.GetServer(Guid.Parse(machineId)).Result;
+            return server.ToManagedMachine();
         }
 
         public bool SupportsBatchedManagementRequests
