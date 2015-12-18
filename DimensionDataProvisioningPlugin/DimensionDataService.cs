@@ -32,8 +32,8 @@ namespace DimensionDataProvisioningPlugin
             // Load defaults
             _defaultImageName = ConfigurationManager.AppSettings["defaultImageName"];
             _defaultServerMemorySizeGb = Convert.ToInt32(ConfigurationManager.AppSettings["defaultServerMemoryGb"]);
-            _defaultCoresPerSocket = Convert.ToInt32(ConfigurationManager.AppSettings["defaultServerCoresPerSocket"]);
-            _defaultCpuCount = Convert.ToInt32(ConfigurationManager.AppSettings["defaultServerCpuCount"]);
+            _defaultCoresPerSocket = Convert.ToUInt32(ConfigurationManager.AppSettings["defaultServerCoresPerSocket"]);
+            _defaultCpuCount = Convert.ToUInt32(ConfigurationManager.AppSettings["defaultServerCpuCount"]);
             _defaultNetworkDomain = ConfigurationManager.AppSettings["defaultNetworkDomainName"];
             _defaultVlan = ConfigurationManager.AppSettings["defaultVlanName"];
         }
