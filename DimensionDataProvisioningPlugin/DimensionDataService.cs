@@ -19,8 +19,8 @@ namespace DimensionDataProvisioningPlugin
 
         private string _defaultImageName;
         private int _defaultServerMemorySizeGb;
-        private int _defaultCpuCount;
-        private int _defaultCoresPerSocket;
+        private uint _defaultCpuCount;
+        private uint _defaultCoresPerSocket;
         private string _defaultNetworkDomain;
         private string _defaultVlan;
 
