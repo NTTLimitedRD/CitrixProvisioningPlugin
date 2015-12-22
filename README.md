@@ -2,6 +2,10 @@ About
 -----
 This is a Dimension Data Cloud plugin for Citrix's Machine Creation API.
 
+Latest Build: 
+[![Build status](https://ci.appveyor.com/api/projects/status/f207bx7mipmb7qfu?svg=true)](https://ci.appveyor.com/project/tonybaloney/citrixprovisioningplugin)
+
+
 Deploy
 ------
 
