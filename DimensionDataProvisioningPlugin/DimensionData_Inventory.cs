@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Citrix.MachineCreationAPI;
 using Citrix.ManagedMachineAPI;
+using DD.CBU.Compute.Api.Client;
+using DD.CBU.Compute.Api.Contracts.Image;
+using DD.CBU.Compute.Api.Contracts.Network20;
 
 namespace DimensionDataProvisioningPlugin
 {
@@ -32,9 +35,7 @@ namespace DimensionDataProvisioningPlugin
     {
         private const string RootFolderPath = "/";
 
-        private readonly Dictionary<string, string> networks = new Dictionary<string, string>();
         private readonly Dictionary<string, string> storagePools = new Dictionary<string, string>();
-        private readonly Dictionary<string, string> templates = new Dictionary<string, string>();
  
         /// <summary>
         /// Dummy extension data dictionary attached to all inventory items. Has no entries.
@@ -68,9 +69,12 @@ namespace DimensionDataProvisioningPlugin
             List<IInventoryItem> inventoryItems = new List<IInventoryItem>();
             if (path == RootFolderPath)
             {
-                AddNetworks(path, inventoryItems);
-                AddStoragePools(path, inventoryItems);
-                AddTemplates(path, inventoryItems);
+                ComputeApiClient client = connectionSettings.GetComputeClient();
+                IEnumerable<NetworkDomainType> networkDomains = client.Networking.NetworkDomain.GetNetworkDomains().Result;
+                AddNetworks(path, inventoryItems, networkDomains);
+                //AddStoragePools(path, inventoryItems, storage);
+                var images = client.ServerManagementLegacy.ServerImage.GetImages(null, null, null, null, null).Result;
+                AddTemplates(path, inventoryItems, images);
             }
             return inventoryItems;
         }
@@ -112,34 +116,12 @@ namespace DimensionDataProvisioningPlugin
 
         internal void GatherInventory()
         {
-            // Assume the existence of some networks. We'll assume that GUIDs are used as the unique ID
-            // for each resource here.
-            networks.Add("2AACE8C9-37EB-4F23-A3D2-1DB6E7EFF242", "Network 0");
-            networks.Add("D6448E5C-5633-4665-A446-799C7945A738", "PrivateInternal");
-
-            // Assume the existence of some storage pools
-            storagePools.Add("3CF5084F-BF77-4A05-940F-1618008945C1", "PoolA");
-            storagePools.Add("3A74A889-4DDA-4918-B9EB-081F5A65536B", "PoolB");
-
-            // Assume the existence of some master image templates
-            templates.Add("47FC5151-819C-43BD-A074-AC9ED8B48012", "VDIImageWindows8_64bit");
-            templates.Add("01BFF98B-398B-4833-B1BA-B43AA34FB2AC", "AppServerImageWindows2012_R2");
+            // Nothing to see here.
         }
 
-        private void AddNetworks(string containingPath, List<IInventoryItem> items)
+        private void AddNetworks(string containingPath, List<IInventoryItem> items, IEnumerable<NetworkDomainType> networkDomains)
         {
-            foreach (KeyValuePair<string, string> network in networks)
-            {
-                var item = new InventoryItem(
-                    network.Value,
-                    InventoryItemTypes.Network,
-                    network.Key,
-                    containingPath,
-                    false,
-                    nullExtensionData);
-
-                items.Add(item);
-            }
+            items.AddRange(networkDomains.Select(network => new InventoryItem(network.name, InventoryItemTypes.Network, network.id, containingPath, false, nullExtensionData)).Cast<IInventoryItem>());
         }
 
         private void AddStoragePools(string containingPath, List<IInventoryItem> items)
@@ -158,20 +140,9 @@ namespace DimensionDataProvisioningPlugin
             }
         }
 
-        private void AddTemplates(string containingPath, List<IInventoryItem> items)
+        private void AddTemplates(string containingPath, List<IInventoryItem> items, IReadOnlyList<ImagesWithDiskSpeedImage> images)
         {
-            foreach (KeyValuePair<string, string> template in templates)
-            {
-                var item = new InventoryItem(
-                    template.Value,
-                    InventoryItemTypes.Template,
-                    template.Key,
-                    containingPath,
-                    false,
-                    nullExtensionData);
-
-                items.Add(item);
-            }
+            items.AddRange(images.Select(image => new InventoryItem(image.name, InventoryItemTypes.Template, image.id, containingPath, false, nullExtensionData)).Cast<IInventoryItem>());
         }
     }
 }

@@ -17,7 +17,7 @@ namespace DimensionDataProvisioningPlugin
             // In current versions of the SDK, all calls are unbatched (a separate call is made for each operation),
             // so we may as well return false here. A return value of true is valid, but wouldn't actually change the
             // behaviour in terms of the pattern of calls to the plugin.
-            get { return false; }
+            get { return true; }
         }
 
         public bool SupportsBatchedDeletionRequests
@@ -25,7 +25,7 @@ namespace DimensionDataProvisioningPlugin
             // In current versions of the SDK, all calls are unbatched (a separate call is made for each operation),
             // so we may as well return false here. A return value of true is valid, but wouldn't actually change the
             // behaviour in terms of the pattern of calls to the plugin.
-            get { return false; }
+            get { return true; }
         }
 
         public IList<MachineCreationResult> CreateMachines(ConnectionSettings connectionSettings, HostingSettings hostingSettings,
